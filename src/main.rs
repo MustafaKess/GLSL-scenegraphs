@@ -52,23 +52,56 @@ fn offset<T>(n: u32) -> *const c_void {
 // ptr::null()
 
 
-// == // Generate your VAO here
 unsafe fn create_vao(vertices: &Vec<f32>, indices: &Vec<u32>) -> u32 {
-    // Implement me!
+    let mut vao = 0;
+    let mut vbo = 0;
+    let mut ibo = 0;
 
-    // Also, feel free to delete comments :)
+    // Create and bind VAO
+    gl::GenVertexArrays(1, &mut vao);
+    gl::BindVertexArray(vao);
 
-    // This should:
-    // * Generate a VAO and bind it
-    // * Generate a VBO and bind it
-    // * Fill it with data
-    // * Configure a VAP for the data and enable it
-    // * Generate a IBO and bind it
-    // * Fill it with data
-    // * Return the ID of the VAO
+    // Create and bind VBO
+    gl::GenBuffers(1, &mut vbo);
+    gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
 
-    0
+    // Upload vertices
+    gl::BufferData(
+        gl::ARRAY_BUFFER,
+        byte_size_of_array(vertices),
+        pointer_to_array(vertices),
+        gl::STATIC_DRAW,
+    );
+
+    // Describe the vertex data
+    gl::VertexAttribPointer(
+        0,
+        3,
+        gl::FLOAT,
+        gl::FALSE,
+        3 * size_of::<f32>(),
+        ptr::null(),
+    );
+
+    gl::EnableVertexAttribArray(0);
+
+    // Create and bind IBO
+    gl::GenBuffers(1, &mut ibo);
+    gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, ibo);
+
+    // Upload indices
+    gl::BufferData(
+        gl::ELEMENT_ARRAY_BUFFER,
+        byte_size_of_array(indices),
+        pointer_to_array(indices),
+        gl::STATIC_DRAW,
+    );
+
+    vao
 }
+
+
+
 
 
 fn main() {
@@ -130,27 +163,64 @@ fn main() {
             println!("GLSL\t: {}", util::get_gl_string(gl::SHADING_LANGUAGE_VERSION));
         }
 
+
+
         // == // Set up your VAO around here
 
-        let my_vao = unsafe { 1337 };
+   let vertices: Vec<f32> = vec![
+    // Triangle 1
+    -0.9, -0.9, 0.0,
+    -0.5, -0.9, 0.0,
+    -0.7, -0.5, 0.0,
+
+    // Triangle 2
+     0.5, -0.9, 0.0,
+     0.9, -0.9, 0.0,
+     0.7, -0.5, 0.0,
+
+    // Triangle 3
+    -0.9, -0.3, 0.0,
+    -0.5, -0.3, 0.0,
+    -0.7,  0.1, 0.0,
+
+    // Triangle 4
+     0.5, -0.3, 0.0,
+     0.9, -0.3, 0.0,
+     0.7,  0.1, 0.0,
+
+    // Triangle 5
+    -0.2, 0.2, 0.0,
+     0.2, 0.2, 0.0,
+     0.0, 0.8, 0.0,
+];
+
+let indices: Vec<u32> = vec![
+     0,  1,  2,
+     3,  4,  5,
+     6,  7,  8,
+     9, 10, 11,
+    12, 13, 14,
+];
+
+let my_vao = unsafe {
+    create_vao(&vertices, &indices)
+};
+
+let index_count = indices.len() as i32;
 
 
-        // == // Set up your shaders here
 
-        // Basic usage of shader helper:
-        // The example code below creates a 'shader' object.
-        // It which contains the field `.program_id` and the method `.activate()`.
-        // The `.` in the path is relative to `Cargo.toml`.
-        // This snippet is not enough to do the exercise, and will need to be modified (outside
-        // of just using the correct path), but it only needs to be called once
 
-        /*
-        let simple_shader = unsafe {
-            shader::ShaderBuilder::new()
-                .attach_file("./path/to/simple/shader.file")
-                .link()
-        };
-        */
+let simple_shader = unsafe {
+    shader::ShaderBuilder::new()
+        .attach_file("./shaders/simple.vert")
+        .attach_file("./shaders/simple.frag")
+        .link()
+};
+
+unsafe {
+    simple_shader.activate();
+}
 
 
         // Used to demonstrate keyboard handling for exercise 2.
@@ -211,14 +281,17 @@ fn main() {
 
 
             unsafe {
-                // Clear the color and depth buffers
-                gl::ClearColor(0.035, 0.046, 0.078, 1.0); // night sky
+                gl::ClearColor(0.035, 0.046, 0.078, 1.0);
                 gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
 
+                gl::BindVertexArray(my_vao);
 
-                // == // Issue the necessary gl:: commands to draw your scene here
-
-
+                gl::DrawElements(
+                gl::TRIANGLES,
+                index_count,
+                gl::UNSIGNED_INT,
+                ptr::null(),
+    );
 
             }
 
