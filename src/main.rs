@@ -175,21 +175,22 @@ fn main() {
         // == // Set up your VAO around here
 
     // x, y, z
-/*  TASK 1:
-  //let vertices: Vec<f32> = vec![
+  // TASK 1:
+  /* 
+  let vertices: Vec<f32> = vec![
     // Triangle 1
-   // -0.9, -0.9, 0.0,
+    -0.8, -0.5, 0.0,
     -0.5, -0.9, 0.0,
     -0.7, -0.5, 0.0,
 
     // Triangle 2
      0.5, -0.9, 0.0,
-     0.9, -0.9, 0.0,
+     0.9, -0.6, 0.0,
      0.7, -0.5, 0.0,
 
     // Triangle 3
-    -0.9, -0.3, 0.0,
-    -0.5, -0.3, 0.0,
+    -0.9, -0.2, 0.0,
+    -0.4, -0.3, 0.0,
     -0.7,  0.1, 0.0,
 
     // Triangle 4
@@ -215,20 +216,42 @@ let indices: Vec<u32> = vec![
 
 
 // Task 2a:
-// Single triangle with vertices:
-// v0 = ( 0.6, -0.8, -1.2)
-// v1 = ( 0.0,  0.4,  0.0)
-// v2 = (-0.8, -0.2,  1.2)
 
+/* 
 let vertices: Vec<f32> = vec![
-     0.6, -0.8, -1.2,  // v0
-     0.0,  0.4,  0.0,  // v1
-    -0.8, -0.2,  1.2,  // v2
+     0.6, -0.8, -1.2,  
+     0.0,  0.4,  0.0,  
+    -0.8, -0.2,  1.2,  
 ];
 
 let indices: Vec<u32> = vec![
     0, 1, 2,
 ];
+*/
+
+
+
+//Task 2b: (loaned triangle 1 & 2 from task 1)
+
+  let vertices: Vec<f32> = vec![
+    // Triangle 1
+    -0.8, -0.5, 0.0,
+    -0.5, -0.9, 0.0,
+    -0.7, -0.5, 0.0,
+
+    // Triangle 2
+     0.5, -0.9, 0.0,
+     0.9, -0.6, 0.0,
+     0.7, -0.5, 0.0,
+];
+
+let indices: Vec<u32> = vec![
+     1,  0,  2, // Swapped 0 and 1 
+     3,  4,  5,
+];   
+
+//*/
+
 
 
 
