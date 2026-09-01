@@ -7,11 +7,15 @@
 #![allow(unused_unsafe)]
 #![allow(unused_variables)]
 */
+
+
+//imports 
 extern crate nalgebra_glm as glm;
 use std::{ mem, ptr, os::raw::c_void };
 use std::thread;
 use std::sync::{Mutex, Arc, RwLock};
 
+//other modules
 mod shader;
 mod util;
 
@@ -52,20 +56,22 @@ fn offset<T>(n: u32) -> *const c_void {
 // ptr::null()
 
 
+//VAO creation, vertices = actual vertex positions, 
+// indices = the order in which the vertices are drawn
 unsafe fn create_vao(vertices: &Vec<f32>, indices: &Vec<u32>) -> u32 {
     let mut vao = 0;
     let mut vbo = 0;
     let mut ibo = 0;
 
-    // Create and bind VAO
+    //create and bind VAO
     gl::GenVertexArrays(1, &mut vao);
     gl::BindVertexArray(vao);
 
-    // Create and bind VBO
+    //same for VBO
     gl::GenBuffers(1, &mut vbo);
     gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
 
-    // Upload vertices
+    // Copies the vertices data into GPU memory (the currently bound VBO)
     gl::BufferData(
         gl::ARRAY_BUFFER,
         byte_size_of_array(vertices),
@@ -89,7 +95,8 @@ unsafe fn create_vao(vertices: &Vec<f32>, indices: &Vec<u32>) -> u32 {
     gl::GenBuffers(1, &mut ibo);
     gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, ibo);
 
-    // Upload indices
+   
+   // Buffer again, but this time for the indices
     gl::BufferData(
         gl::ELEMENT_ARRAY_BUFFER,
         byte_size_of_array(indices),
@@ -167,9 +174,11 @@ fn main() {
 
         // == // Set up your VAO around here
 
-   let vertices: Vec<f32> = vec![
+    // x, y, z
+/*  TASK 1:
+  //let vertices: Vec<f32> = vec![
     // Triangle 1
-    -0.9, -0.9, 0.0,
+   // -0.9, -0.9, 0.0,
     -0.5, -0.9, 0.0,
     -0.7, -0.5, 0.0,
 
@@ -194,6 +203,7 @@ fn main() {
      0.0, 0.8, 0.0,
 ];
 
+
 let indices: Vec<u32> = vec![
      0,  1,  2,
      3,  4,  5,
@@ -201,6 +211,26 @@ let indices: Vec<u32> = vec![
      9, 10, 11,
     12, 13, 14,
 ];
+*/
+
+
+// Task 2a:
+// Single triangle with vertices:
+// v0 = ( 0.6, -0.8, -1.2)
+// v1 = ( 0.0,  0.4,  0.0)
+// v2 = (-0.8, -0.2,  1.2)
+
+let vertices: Vec<f32> = vec![
+     0.6, -0.8, -1.2,  // v0
+     0.0,  0.4,  0.0,  // v1
+    -0.8, -0.2,  1.2,  // v2
+];
+
+let indices: Vec<u32> = vec![
+    0, 1, 2,
+];
+
+
 
 let my_vao = unsafe {
     create_vao(&vertices, &indices)
@@ -210,8 +240,8 @@ let index_count = indices.len() as i32;
 
 
 
-
-let simple_shader = unsafe {
+//implementation of the shader builder is in src/shader.rs
+let simple_shader = unsafe { 
     shader::ShaderBuilder::new()
         .attach_file("./shaders/simple.vert")
         .attach_file("./shaders/simple.frag")
