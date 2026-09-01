@@ -229,7 +229,7 @@ let indices: Vec<u32> = vec![
 ];
 */
 
-
+/* 
 
 //Task 2b: (loaned triangle 1 & 2 from task 1)
 
@@ -250,8 +250,26 @@ let indices: Vec<u32> = vec![
      3,  4,  5,
 ];   
 
-//*/
+*/
 
+
+//For testing 2b 
+  let vertices: Vec<f32> = vec![
+    // Triangle 1
+    -0.8, -0.5, 0.0,
+    -0.5, -0.9, 0.0,
+    -0.7, -0.5, 0.0,
+
+    // Triangle 2
+     0.5, -0.9, 0.0,
+     0.9, -0.6, 0.0,
+     0.7, -0.5, 0.0,
+];
+
+let indices: Vec<u32> = vec![
+     0,  1,  2, // After swapped 0 and 1 
+     3,  4,  5,
+];   
 
 
 
