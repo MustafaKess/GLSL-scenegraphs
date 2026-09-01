@@ -246,7 +246,7 @@ let indices: Vec<u32> = vec![
 ];
 
 let indices: Vec<u32> = vec![
-     1,  0,  2, // Swapped 0 and 1 
+     1,  0,  2, // After swapped 0 and 1 
      3,  4,  5,
 ];   
 
