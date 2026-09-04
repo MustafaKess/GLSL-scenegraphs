@@ -293,6 +293,11 @@ unsafe {
     simple_shader.activate();
 }
 
+let time_location = unsafe { //needed for extra challange d, for color changing
+
+    simple_shader.get_uniform_location("time")
+};
+
 
         // Used to demonstrate keyboard handling for exercise 2.
         let mut _arbitrary_number = 0.0; // feel free to remove
@@ -356,6 +361,8 @@ unsafe {
                 gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
 
                 gl::BindVertexArray(my_vao);
+
+                gl::Uniform1f(time_location, elapsed); //needed for extra challange d, for color changing
 
                 gl::DrawElements(
                 gl::TRIANGLES,
