@@ -1,55 +1,53 @@
-# Gloom-rs
+# TDT4195 – Computer Graphics Assignment 1
 
-To get started, make sure you have `git`, `cargo` and, `rustc` installed and available.
+Implementation of **Assignment 1** for **TDT4195: Visual Computing Fundamentals** at NTNU.
 
-	git clone https://github.com/pbsds/gloom-rs
-	cd gloom-rs
-	cargo run
+This project introduces the fundamentals of real-time computer graphics using **Rust**, **OpenGL**, and **GLSL**. The implementation is based on the provided **Gloom-rs** starter project.
+
+Checkout https://github.com/pbsds/gloom-rs for the original starter project
+
+## Overview
+
+The project covers the basic concepts required to begin working with OpenGL:
+
+- Creating and configuring Vertex Array Objects (VAOs)
+- Creating and using vertex and index buffers
+- Rendering triangles
+- Loading and linking GLSL shaders
+- Using vertex and fragment shaders
+- Understanding rasterization
+- Understanding face culling and vertex winding order
+- Using the depth buffer
+- Modifying shader behaviour
+- Applying transformations in shaders
+- Experimenting with fragment coordinates
+- Procedural rendering with GLSL
+
+The final implementation contains the completed state of the project after working through the required tasks.
+
+## Technologies
+
+- **Rust**
+- **OpenGL 4.0 Core or higher**
+- **GLSL**
+- **Gloom-rs**
+
+No additional external libraries are used beyond those provided with the Gloom-rs project.
+
+## Requirements
+
+The project requires:
+
+- Rust
+- `cargo`
+- `rustc`
+- A GPU/driver supporting **OpenGL 4.0 Core or higher**
+
+### Supported Operating Systems
+
+The assignment is intended to be run on:
+
+- Linux
+- Windows
 
 
-## GLM
-
-We use a variant of GLM known as [nalgebra-glm](https://docs.rs/nalgebra-glm/0.15.0/nalgebra_glm/), which differs *slightly* from the standard GLM library.
-
-
-## Report
-
-You're free to write your report any way you'd like, as long as it is delivered as a PDF file.
-
-To spread the gospel, I have included a `pandoc` report skeleton in the `report` folder.
-To use pandoc, make sure you have `pandoc` installed along with a supported latex engine.
-Make sure it works before using it to write your report.
-
-## Cybele
-
-If you're using the lab computers in Cybele, you will be using a network-mounted home directory which is subject to both low quotas and high latency.
-To speed up your work we highly reccomend running the following, to put the build directory in RAM rather than on disk:
-
-```shell
-test -d target/ && rm -rf target/
-ln -s /dev/shm target
-```
-
-## Code delivery
-
-We want the following files and folders to be delivered in a ZIP file:
-
-* `resources`
-* `shaders`
-* `src`
-* `Cargo.lock`
-* `Cargo.toml`
-
-**Important:** Do not include the `target` folder!
-
-To automatically make an archive (`source.zip`) ready for uploading to blackboard:
-
-* Make sure any extra assets or resources you might have added are located in the `resources` folder
-* Then run either:
-	* `./create_code_archive_for_blackboard_LINUX.sh`
-	* `create_code_archive_for_blackboard_WINDOWS.bat`.
-
-This zip script will explicitly ignore the `target` folder, and the following two of the files given as a handout for exercise 3 (just to save space):
-
-* `resources/helicopter.obj`
-* `resources/lunarsurface.obj`
