@@ -58,20 +58,27 @@ fn offset<T>(n: u32) -> *const c_void {
 
 //VAO creation, vertices = actual vertex positions, 
 // indices = the order in which the vertices are drawn
-unsafe fn create_vao(vertices: &Vec<f32>, indices: &Vec<u32>) -> u32 {
+unsafe fn create_vao(
+    vertices: &Vec<f32>,
+    indices: &Vec<u32>,
+    colors: &Vec<f32>
+) -> u32 {
     let mut vao = 0;
     let mut vbo = 0;
+    let mut cbo = 0;
     let mut ibo = 0;
 
-    //create and bind VAO
+    // VAO
     gl::GenVertexArrays(1, &mut vao);
     gl::BindVertexArray(vao);
 
-    //same for VBO
+    // =========================
+    // Vertex positions
+    // =========================
+
     gl::GenBuffers(1, &mut vbo);
     gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
 
-    // Copies the vertices data into GPU memory (the currently bound VBO)
     gl::BufferData(
         gl::ARRAY_BUFFER,
         byte_size_of_array(vertices),
@@ -79,7 +86,7 @@ unsafe fn create_vao(vertices: &Vec<f32>, indices: &Vec<u32>) -> u32 {
         gl::STATIC_DRAW,
     );
 
-    // Describe the vertex data
+    // Attribute 0 = position
     gl::VertexAttribPointer(
         0,
         3,
@@ -91,12 +98,37 @@ unsafe fn create_vao(vertices: &Vec<f32>, indices: &Vec<u32>) -> u32 {
 
     gl::EnableVertexAttribArray(0);
 
-    // Create and bind IBO
+
+    // Vertex colors
+
+    gl::GenBuffers(1, &mut cbo);
+    gl::BindBuffer(gl::ARRAY_BUFFER, cbo);
+
+    gl::BufferData(
+        gl::ARRAY_BUFFER,
+        byte_size_of_array(colors),
+        pointer_to_array(colors),
+        gl::STATIC_DRAW,
+    );
+
+    // Attribute 1 = color
+    gl::VertexAttribPointer(
+        1,
+        4,
+        gl::FLOAT,
+        gl::FALSE,
+        4 * size_of::<f32>(),
+        ptr::null(),
+    );
+
+    gl::EnableVertexAttribArray(1);
+
+
+    // Indices
+ 
     gl::GenBuffers(1, &mut ibo);
     gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, ibo);
 
-   
-   // Buffer again, but this time for the indices
     gl::BufferData(
         gl::ELEMENT_ARRAY_BUFFER,
         byte_size_of_array(indices),
@@ -174,10 +206,9 @@ fn main() {
 
         // == // Set up your VAO around here
 
-    // x, y, z
-  // TASK 1:
-  /* 
-  let vertices: Vec<f32> = vec![
+
+
+let vertices: Vec<f32> = vec![
     // Triangle 1
     -0.8, -0.5, 0.0,
     -0.5, -0.9, 0.0,
@@ -192,89 +223,33 @@ fn main() {
     -0.9, -0.2, 0.0,
     -0.4, -0.3, 0.0,
     -0.7,  0.1, 0.0,
-
-    // Triangle 4
-     0.5, -0.3, 0.0,
-     0.9, -0.3, 0.0,
-     0.7,  0.1, 0.0,
-
-    // Triangle 5
-    -0.2, 0.2, 0.0,
-     0.2, 0.2, 0.0,
-     0.0, 0.8, 0.0,
 ];
 
+let colors: Vec<f32> = vec![
+    // Triangle 1
+    1.0, 0.0, 0.0, 1.0, // Red
+    0.0, 1.0, 0.0, 1.0, // Green
+    0.0, 0.0, 1.0, 1.0, // Blue
 
-let indices: Vec<u32> = vec![
-     0,  1,  2,
-     3,  4,  5,
-     6,  7,  8,
-     9, 10, 11,
-    12, 13, 14,
-];
-*/
+    // Triangle 2
+    1.0, 0.0, 0.0, 1.0, // Red
+    0.0, 1.0, 0.0, 1.0, // Green
+    0.0, 0.0, 1.0, 1.0, // Blue
 
-
-// Task 2a:
-
-/* 
-let vertices: Vec<f32> = vec![
-     0.6, -0.8, -1.2,  
-     0.0,  0.4,  0.0,  
-    -0.8, -0.2,  1.2,  
+    // Triangle 3
+    1.0, 0.0, 0.0, 1.0, // Red
+    0.0, 1.0, 0.0, 1.0, // Green
+    0.0, 0.0, 1.0, 1.0, // Blue
 ];
 
 let indices: Vec<u32> = vec![
     0, 1, 2,
+    3, 4, 5,
+    6, 7, 8,
 ];
-*/
-
-/* 
-
-//Task 2b: (loaned triangle 1 & 2 from task 1)
-
-  let vertices: Vec<f32> = vec![
-    // Triangle 1
-    -0.8, -0.5, 0.0,
-    -0.5, -0.9, 0.0,
-    -0.7, -0.5, 0.0,
-
-    // Triangle 2
-     0.5, -0.9, 0.0,
-     0.9, -0.6, 0.0,
-     0.7, -0.5, 0.0,
-];
-
-let indices: Vec<u32> = vec![
-     1,  0,  2, // After swapped 0 and 1 
-     3,  4,  5,
-];   
-
-*/
-
-
-//For testing 2b 
-  let vertices: Vec<f32> = vec![
-    // Triangle 1
-    -0.8, -0.5, 0.0,
-    -0.5, -0.9, 0.0,
-    -0.7, -0.5, 0.0,
-
-    // Triangle 2
-     0.5, -0.9, 0.0,
-     0.9, -0.6, 0.0,
-     0.7, -0.5, 0.0,
-];
-
-let indices: Vec<u32> = vec![
-     0,  1,  2, // After swapped 0 and 1 
-     3,  4,  5,
-];   
-
-
 
 let my_vao = unsafe {
-    create_vao(&vertices, &indices)
+    create_vao(&vertices, &indices, &colors)
 };
 
 let index_count = indices.len() as i32;
@@ -293,10 +268,12 @@ unsafe {
     simple_shader.activate();
 }
 
+/*
 let time_location = unsafe { //needed for extra challange d, for color changing
 
     simple_shader.get_uniform_location("time")
 };
+*/
 
 
         // Used to demonstrate keyboard handling for exercise 2.
@@ -362,7 +339,7 @@ let time_location = unsafe { //needed for extra challange d, for color changing
 
                 gl::BindVertexArray(my_vao);
 
-                gl::Uniform1f(time_location, elapsed); //needed for extra challange d, for color changing
+                //gl::Uniform1f(time_location, elapsed); //needed for extra challange d, for color changing
 
                 gl::DrawElements(
                 gl::TRIANGLES,

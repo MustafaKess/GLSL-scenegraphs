@@ -1,9 +1,12 @@
 #version 430 core
 
-in vec3 position;
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec4 color;
+
+out vec4 vertexColor;
 
 void main()
 {
-    // Flip the scene horizontally and vertically
     gl_Position = vec4(-position.x, -position.y, position.z, 1.0f);
+    vertexColor = color;
 }

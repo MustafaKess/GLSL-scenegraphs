@@ -1,5 +1,5 @@
 #version 430 core
-
+//assignment 1, extra task d
 out vec4 color;
 
 uniform float time;
