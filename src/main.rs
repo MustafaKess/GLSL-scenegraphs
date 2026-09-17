@@ -267,8 +267,13 @@ unsafe {
     simple_shader.activate();
 }
 
+// allowing transform value (task 3, assignment 2)
+let transform_value_location = unsafe {
+    simple_shader.get_uniform_location("transformValue")
+};
+
 /*
-let time_location = unsafe { //needed for extra challange d, for color changing
+let time_location = unsafe { //needed for extra challange d (assignment 1), for color changing
 
     simple_shader.get_uniform_location("time")
 };
@@ -339,12 +344,13 @@ let time_location = unsafe { //needed for extra challange d, for color changing
                 gl::BindVertexArray(my_vao);
 
                 //gl::Uniform1f(time_location, elapsed); //needed for extra challange d, for color changing
-
+                gl::Uniform1f(transform_value_location, elapsed.sin()); // for transformations
+                
                 gl::DrawElements(
-                gl::TRIANGLES,
-                index_count,
-                gl::UNSIGNED_INT,
-                ptr::null(),
+                    gl::TRIANGLES,
+                    index_count,
+                    gl::UNSIGNED_INT,
+                    ptr::null(),
     );
 
             }
