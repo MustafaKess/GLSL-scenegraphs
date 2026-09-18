@@ -285,7 +285,7 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
 
 
         // Used to demonstrate keyboard handling for exercise 2.
-        let mut _arbitrary_number = 0.0; // feel free to remove
+        //let mut _arbitrary_number = 0.0; // feel free to remove
 
 
         //Task 4, assignment 2
@@ -319,22 +319,53 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
                 }
             }
 
-            // Handle keyboard input
+
+            
+
             if let Ok(keys) = pressed_keys.lock() {
                 for key in keys.iter() {
                     match key {
-                        // The `VirtualKeyCode` enum is defined here:
-                        //    https://docs.rs/winit/0.25.0/winit/event/enum.VirtualKeyCode.html
 
+                        // Camera movement along X axis
                         VirtualKeyCode::A => {
-                            _arbitrary_number += delta_time;
+                            camera_x -= 2.0 * delta_time;
                         }
                         VirtualKeyCode::D => {
-                            _arbitrary_number -= delta_time;
+                            camera_x += 2.0 * delta_time;
                         }
 
+                        // Camera movement along Z axis
+                        VirtualKeyCode::W => {
+                            camera_z -= 2.0 * delta_time;
+                        }
+                        VirtualKeyCode::S => {
+                            camera_z += 2.0 * delta_time;
+                        }
 
-                        // default handler:
+                        // Camera movement along Y axis
+                        VirtualKeyCode::Space => {
+                            camera_y += 2.0 * delta_time;
+                        }
+                        VirtualKeyCode::LShift => {
+                            camera_y -= 2.0 * delta_time;
+                        }
+
+                        // Camera horizontal rotation
+                        VirtualKeyCode::Left => {
+                            camera_yaw -= delta_time;
+                        }
+                        VirtualKeyCode::Right => {
+                            camera_yaw += delta_time;
+                        }
+
+                        // Camera vertical rotation
+                        VirtualKeyCode::Up => {
+                            camera_pitch += delta_time;
+                        }
+                        VirtualKeyCode::Down => {
+                            camera_pitch -= delta_time;
+                        }
+
                         _ => { }
                     }
                 }
