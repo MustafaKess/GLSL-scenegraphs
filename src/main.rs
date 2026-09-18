@@ -263,13 +263,17 @@ let simple_shader = unsafe {
         .link()
 };
 
-unsafe {
-    simple_shader.activate();
-}
 
+
+/*
 // allowing transform value (task 3, assignment 2)
 let transform_value_location = unsafe {
     simple_shader.get_uniform_location("transformValue")
+};
+*/
+
+let transform_location = unsafe {
+    simple_shader.get_uniform_location("transform")
 };
 
 /*
@@ -283,6 +287,16 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
         // Used to demonstrate keyboard handling for exercise 2.
         let mut _arbitrary_number = 0.0; // feel free to remove
 
+
+        //Task 4, assignment 2
+        // Camera position
+        let mut camera_x: f32 = 0.0;
+        let mut camera_y: f32 = 0.0;
+        let mut camera_z: f32 = 0.0;
+
+        // Camera rotation
+        let mut camera_yaw: f32 = 0.0;
+        let mut camera_pitch: f32 = 0.0;
 
         // The main rendering loop
         let first_frame_time = std::time::Instant::now();
@@ -336,22 +350,46 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
 
             // == // Please compute camera transforms here (exercise 2 & 3)
 
+            // Move the triangles into the negative z range,
+            // between the near and far clipping planes.
+            let translation: glm::Mat4 =
+                glm::translation(&glm::vec3(0.0, 0.0, -2.0)); 
+
+            let projection: glm::Mat4 =
+                glm::perspective(
+                    window_aspect_ratio,
+                    glm::radians(&glm::vec1(45.0)).x,
+                    1.0,
+                    100.0,
+            );
+
+                // Projection must be the final transformation.
+            let transform: glm::Mat4 = projection * translation;
+
 
             unsafe {
+                simple_shader.activate();
+
                 gl::ClearColor(0.035, 0.046, 0.078, 1.0);
                 gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
 
                 gl::BindVertexArray(my_vao);
 
                 //gl::Uniform1f(time_location, elapsed); //needed for extra challange d, for color changing
-                gl::Uniform1f(transform_value_location, elapsed.sin()); // for transformations
+                //gl::Uniform1f(transform_value_location, elapsed.sin()); // for transformations (task 3)
+                gl::UniformMatrix4fv(
+                    transform_location,
+                    1,
+                    gl::FALSE,
+                    transform.as_ptr(),
+                    );
                 
                 gl::DrawElements(
                     gl::TRIANGLES,
                     index_count,
                     gl::UNSIGNED_INT,
                     ptr::null(),
-    );
+                    );
 
             }
 
