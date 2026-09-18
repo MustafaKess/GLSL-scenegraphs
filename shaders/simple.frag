@@ -1,6 +1,8 @@
 #version 430 core
 
-in vec4 vertexColor;
+//in vec4 vertexColor;
+noperspective in vec4 vertexColor; //to showcase interpolation (5b)
+//smooth in vec4 vertexColor;
 
 out vec4 color;
 

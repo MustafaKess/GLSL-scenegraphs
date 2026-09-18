@@ -211,34 +211,37 @@ let z2 = 0.0;  // middle
 let z3 = -0.5; // back
 
 let vertices: Vec<f32> = vec![
-    -0.13, -0.03, z1,
-     0.16, -0.43, z1,
-    -0.03, -0.03, z1,
+    // Triangle 1, different depths to show perspective correct interpolation
+    -4.0, -1.0,   0.0,
+    4.0, -1.0,   0.0,
+    0.0, -1.0, -20.0,
 
+    // Triangle 2
     -0.16, -0.23, z2,
      0.23,  0.06, z2,
      0.03,  0.16, z2,
 
+    // Triangle 3
     -0.33, -0.16, z3,
      0.16, -0.26, z3,
     -0.13,  0.13, z3,
 ];
 
 let colors: Vec<f32> = vec![
-    // Triangle 1 = RED
-    1.0, 0.0, 0.0, 0.5,
-    1.0, 0.0, 0.0, 0.5,
-    1.0, 0.0, 0.0, 0.5,
+    // Triangle 1, different colors to easily show interpolation (task 5b, assignment 2)
+    1.0, 0.0, 0.0, 1.0,   // near left
+    0.0, 0.0, 1.0, 1.0,   // near right
+    0.0, 1.0, 0.0, 1.0,   // far (green = 1 here, 0 at the near vertices)
 
-    // Triangle 2 = BLUE
-    0.0, 0.0, 1.0, 0.5,
-    0.0, 0.0, 1.0, 0.5,
-    0.0, 0.0, 1.0, 0.5,
+    // Triangle 2
+    1.0, 0.0, 0.0, 1.0,
+    1.0, 0.0, 0.0, 1.0,
+    1.0, 0.0, 0.0, 1.0,
 
-    // Triangle 3 = GREEN
-    0.0, 1.0, 0.0, 0.5,
-    0.0, 1.0, 0.0, 0.5,
-    0.0, 1.0, 0.0, 0.5,
+    // Triangle 3
+    0.0, 1.0, 0.0, 1.0,
+    0.0, 1.0, 0.0, 1.0,
+    0.0, 1.0, 0.0, 1.0,
 ];
 
 let indices: Vec<u32> = vec![
@@ -320,8 +323,98 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
             }
 
 
+
+            // Changes done after 5A (bonus task)
+            let mut movement = glm::vec3(0.0, 0.0, 0.0);
+
+            if let Ok(keys) = pressed_keys.lock() {
+                for key in keys.iter() {
+                    match key {
+
+                        // Camera movement relative to where it is facing
+                        VirtualKeyCode::A => {
+                            movement.x -= 2.0 * delta_time;
+                        }
+                        VirtualKeyCode::D => {
+                            movement.x += 2.0 * delta_time;
+                        }
+
+                        VirtualKeyCode::W => {
+                            movement.z -= 2.0 * delta_time;
+                        }
+                        VirtualKeyCode::S => {
+                            movement.z += 2.0 * delta_time;
+                        }
+
+                        VirtualKeyCode::Space => {
+                            movement.y += 2.0 * delta_time;
+                        }
+                        VirtualKeyCode::LShift => {
+                            movement.y -= 2.0 * delta_time;
+                        }
+
+                        // Camera rotation
+                        VirtualKeyCode::Left => {
+                            camera_yaw -= delta_time;
+                        }
+                        VirtualKeyCode::Right => {
+                            camera_yaw += delta_time;
+                        }
+
+                        VirtualKeyCode::Up => {
+                            camera_pitch += delta_time;
+                        }
+                        VirtualKeyCode::Down => {
+                            camera_pitch -= delta_time;
+                        }
+
+                        _ => {}
+                    }
+                }
+            }
+
             
 
+            // Limit vertical camera rotation
+            let max_pitch = glm::radians(&glm::vec1(89.0)).x;
+
+            if camera_pitch > max_pitch {
+                camera_pitch = max_pitch;
+            }
+
+            if camera_pitch < -max_pitch {
+                camera_pitch = -max_pitch;
+            }
+            
+            let movement_rotation =
+                glm::rotation(
+                    camera_yaw,
+                    &glm::vec3(0.0, 1.0, 0.0),
+                ) *
+                glm::rotation(
+                    camera_pitch,
+                    &glm::vec3(1.0, 0.0, 0.0),
+                );
+
+            let world_movement =
+                movement_rotation *
+                glm::vec4(
+                    movement.x,
+                    movement.y,
+                    movement.z,
+                    0.0,
+                );
+
+            camera_x += world_movement.x;
+            camera_y += world_movement.y;
+            camera_z += world_movement.z;
+                        
+
+
+
+
+            /*
+            // Keybinds BEFORE CHANGES DUE TO BONUS TASK 5A
             if let Ok(keys) = pressed_keys.lock() {
                 for key in keys.iter() {
                     match key {
@@ -370,6 +463,9 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
                     }
                 }
             }
+            */
+
+
             // Handle mouse movement. delta contains the x and y movement of the mouse since last frame in pixels
             if let Ok(mut delta) = mouse_delta.lock() {
 
