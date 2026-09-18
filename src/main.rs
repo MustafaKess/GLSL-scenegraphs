@@ -385,6 +385,10 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
             let mut camera_transform: glm::Mat4 = glm::identity();
 
             // Move the world in the opposite direction of the camera.
+
+            let scene_translation =
+                glm::translation(&glm::vec3(0.0, 0.0, -2.0)); // Keeps triangles infront of camera
+
             let camera_translation =
                 glm::translation(&glm::vec3(
                     -camera_x,
@@ -406,10 +410,11 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
                 );
 
             // Combine the camera transformations.
-            camera_transform =
-                pitch_rotation *
-                yaw_rotation *
-                camera_translation;
+                camera_transform =
+                    pitch_rotation *
+                    yaw_rotation *
+                    camera_translation *
+                    scene_translation;
 
             let projection: glm::Mat4 =
                 glm::perspective(
