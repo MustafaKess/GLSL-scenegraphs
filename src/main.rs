@@ -381,10 +381,35 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
 
             // == // Please compute camera transforms here (exercise 2 & 3)
 
-            // Move the triangles into the negative z range,
-            // between the near and far clipping planes.
-            let translation: glm::Mat4 =
-                glm::translation(&glm::vec3(0.0, 0.0, -2.0)); 
+            // Create the camera transformation from scratch every frame.
+            let mut camera_transform: glm::Mat4 = glm::identity();
+
+            // Move the world in the opposite direction of the camera.
+            let camera_translation =
+                glm::translation(&glm::vec3(
+                    -camera_x,
+                    -camera_y,
+                    -camera_z,
+                ));
+
+            // Rotate the world in the opposite direction of the camera.
+            let yaw_rotation =
+                glm::rotation(
+                    -camera_yaw,
+                    &glm::vec3(0.0, 1.0, 0.0),
+                );
+
+            let pitch_rotation =
+                glm::rotation(
+                    -camera_pitch,
+                    &glm::vec3(1.0, 0.0, 0.0),
+                );
+
+            // Combine the camera transformations.
+            camera_transform =
+                pitch_rotation *
+                yaw_rotation *
+                camera_translation;
 
             let projection: glm::Mat4 =
                 glm::perspective(
@@ -395,7 +420,7 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
             );
 
                 // Projection must be the final transformation.
-            let transform: glm::Mat4 = projection * translation;
+            let transform: glm::Mat4 = projection * camera_transform;
 
 
             unsafe {
