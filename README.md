@@ -42,14 +42,8 @@ The project is based on the Gloom-rs structure. The main implementation is conta
 - `shaders/simple.vert`
 - `shaders/simple.frag`
 
-The final source code represents the completed state of the assignment rather than separate implementations for each intermediate task.
 
 ## Notes
 
 - OpenGL 4.0 Core or higher is required.
-- OpenGL 4.3 or higher is recommended by the assignment.
-- No additional external libraries should be added.
-- Transformation matrices for Task 4 are created and combined on the CPU in Rust.
-- The final combined transformation matrix is passed to the vertex shader through a uniform.
-- The projection matrix must be the final transformation in the transformation chain.
-- `glm::look_at` is not used; the camera transformation is constructed manually.
+- OpenGL 4.3 or higher is recommended
