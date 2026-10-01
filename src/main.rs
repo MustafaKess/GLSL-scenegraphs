@@ -18,6 +18,7 @@ use std::sync::{Mutex, Arc, RwLock};
 //other modules
 mod shader;
 mod util;
+mod mesh;
 
 use glutin::event::{Event, WindowEvent, DeviceEvent, KeyboardInput, ElementState::{Pressed, Released}, VirtualKeyCode::{self, *}};
 use glutin::event_loop::ControlFlow;
@@ -61,7 +62,8 @@ fn offset<T>(n: u32) -> *const c_void {
 unsafe fn create_vao(
     vertices: &Vec<f32>,
     indices: &Vec<u32>,
-    colors: &Vec<f32>
+    colors: &Vec<f32>,
+    normals: &Vec<f32>,
 ) -> u32 {
     let mut vao = 0;
     let mut vbo = 0;
@@ -86,7 +88,7 @@ unsafe fn create_vao(
         gl::STATIC_DRAW,
     );
 
-    // Attribute 0 = position
+    // Attribute 0 = vertex position
     gl::VertexAttribPointer(
         0,
         3,
@@ -97,6 +99,15 @@ unsafe fn create_vao(
     );
 
     gl::EnableVertexAttribArray(0);
+
+
+    // =========================
+    // Vertex normals
+    // =========================
+
+    let mut nbo = 0;
+
+    gl::GenBuffers(1, &mut nbo);
 
 
     // Vertex colors
@@ -206,55 +217,20 @@ fn main() {
 
         // == // Set up your VAO around here
 
-let z1 = 0.5;  // front
-let z2 = 0.0;  // middle 
-let z3 = -0.5; // back
+let terrain = mesh::Terrain::load("./resources/lunarsurface.obj"); //task 1 wants us to load terrain using this file
 
-let vertices: Vec<f32> = vec![
-    // Triangle 1, different depths to show perspective correct interpolation
-    -4.0, -1.0,   0.0,
-    4.0, -1.0,   0.0,
-    0.0, -1.0, -20.0,
-
-    // Triangle 2
-    -0.16, -0.23, z2,
-     0.23,  0.06, z2,
-     0.03,  0.16, z2,
-
-    // Triangle 3
-    -0.33, -0.16, z3,
-     0.16, -0.26, z3,
-    -0.13,  0.13, z3,
-];
-
-let colors: Vec<f32> = vec![
-    // Triangle 1, different colors to easily show interpolation (task 5b, assignment 2)
-    1.0, 0.0, 0.0, 1.0,   // near left
-    0.0, 0.0, 1.0, 1.0,   // near right
-    0.0, 1.0, 0.0, 1.0,   // far (green = 1 here, 0 at the near vertices)
-
-    // Triangle 2
-    1.0, 0.0, 0.0, 1.0,
-    1.0, 0.0, 0.0, 1.0,
-    1.0, 0.0, 0.0, 1.0,
-
-    // Triangle 3
-    0.0, 1.0, 0.0, 1.0,
-    0.0, 1.0, 0.0, 1.0,
-    0.0, 1.0, 0.0, 1.0,
-];
-
-let indices: Vec<u32> = vec![
-    0, 1, 2,       // z =  0.5
-    3, 4, 5,       // z =  0.0 
-    6, 7, 8,       // z = -0.5
-];
-
-let my_vao = unsafe {
-    create_vao(&vertices, &indices, &colors)
+let terrain_vao = unsafe {
+    create_vao(
+        &terrain.vertices,
+        &terrain.indices,
+        &terrain.colors,
+        &terrain.normals,
+    )
 };
 
-let index_count = indices.len() as i32;
+let index_count = terrain.index_count;
+
+
 
 
 
@@ -517,7 +493,7 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
                     window_aspect_ratio,
                     glm::radians(&glm::vec1(45.0)).x,
                     1.0,
-                    100.0,
+                    1000.0, //assingment 3 change
             );
 
                 // Projection must be the final transformation.
@@ -530,7 +506,7 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
                 gl::ClearColor(0.035, 0.046, 0.078, 1.0);
                 gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
 
-                gl::BindVertexArray(my_vao);
+                gl::BindVertexArray(terrain_vao);
 
                 //gl::Uniform1f(time_location, elapsed); //needed for extra challange d, for color changing
                 //gl::Uniform1f(transform_value_location, elapsed.sin()); // for transformations (task 3)

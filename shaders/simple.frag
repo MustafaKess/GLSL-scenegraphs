@@ -1,12 +1,10 @@
 #version 430 core
 
-//in vec4 vertexColor;
-noperspective in vec4 vertexColor; //to showcase interpolation (5b)
-//smooth in vec4 vertexColor;
+in vec3 vertexNormal;
 
 out vec4 color;
 
 void main()
 {
-    color = vertexColor;
+    color = vec4(normalize(vertexNormal) * 0.5 + 0.5, 1.0);
 }
