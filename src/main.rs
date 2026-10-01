@@ -174,11 +174,56 @@ unsafe fn create_vao(
 }
 
 
+
 unsafe fn draw_scene(
     node: &SceneNode,
     transform: &glm::Mat4,
     transform_location: i32,
 ) {
+    // Translate to the node's position.
+    let translation =
+        glm::translation(&node.position);
+
+    // Rotate around the x, y, and z axes.
+    let rotation_x =
+        glm::rotation(
+            node.rotation.x,
+            &glm::vec3(1.0, 0.0, 0.0),
+        );
+
+    let rotation_y =
+        glm::rotation(
+            node.rotation.y,
+            &glm::vec3(0.0, 1.0, 0.0),
+        );
+
+    let rotation_z =
+        glm::rotation(
+            node.rotation.z,
+            &glm::vec3(0.0, 0.0, 1.0),
+        );
+
+    // Move the reference point to the origin.
+    let reference_translation =
+        glm::translation(&(-node.reference_point));
+
+    // Move the reference point back after rotating.
+    let reference_translation_back =
+        glm::translation(&node.reference_point);
+
+    // Construct the node's relative transformation.
+    let node_transform =
+        translation
+        * reference_translation_back
+        * rotation_z
+        * rotation_y
+        * rotation_x
+        * reference_translation;
+
+    // Combine this node's transformation with the parent's.
+    let current_transform =
+        transform * node_transform;
+
     // Draw this node if it contains a VAO.
     if node.index_count >= 0 {
         gl::BindVertexArray(node.vao_id);
@@ -187,7 +232,7 @@ unsafe fn draw_scene(
             transform_location,
             1,
             gl::FALSE,
-            transform.as_ptr(),
+            current_transform.as_ptr(),
         );
 
         gl::DrawElements(
@@ -202,7 +247,7 @@ unsafe fn draw_scene(
     for i in 0..node.n_children() {
         draw_scene(
             &node[i],
-            transform,
+            &current_transform,
             transform_location,
         );
     }
@@ -361,7 +406,7 @@ let mut helicopter_tail_rotor_node =
         helicopter_tail_rotor_vao,
         helicopter_tail_rotor_index_count,
     );
-    
+
     // Set reference points for the scene graph nodes (task 3a assignment 3)
 
     scene_root.reference_point =
@@ -473,24 +518,24 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
 
                         // Camera movement relative to where it is facing
                         VirtualKeyCode::A => {
-                            movement.x -= 2.0 * delta_time;
+                            movement.x -= 4.0 * delta_time;
                         }
                         VirtualKeyCode::D => {
-                            movement.x += 2.0 * delta_time;
+                            movement.x += 4.0 * delta_time;
                         }
 
                         VirtualKeyCode::W => {
-                            movement.z -= 2.0 * delta_time;
+                            movement.z -= 4.0 * delta_time;
                         }
                         VirtualKeyCode::S => {
-                            movement.z += 2.0 * delta_time;
+                            movement.z += 4.0 * delta_time;
                         }
 
                         VirtualKeyCode::Space => {
-                            movement.y += 2.0 * delta_time;
+                            movement.y += 4.0 * delta_time;
                         }
                         VirtualKeyCode::LShift => {
-                            movement.y -= 2.0 * delta_time;
+                            movement.y -= 4.0 * delta_time;
                         }
 
                         // Camera rotation
@@ -669,13 +714,6 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
 
                 gl::ClearColor(0.035, 0.046, 0.078, 1.0);
                 gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
-
-                gl::UniformMatrix4fv(
-                    transform_location,
-                    1,
-                    gl::FALSE,
-                    transform.as_ptr(),
-                );
 
                 draw_scene(
                     &scene_root,
