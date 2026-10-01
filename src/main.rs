@@ -174,7 +174,39 @@ unsafe fn create_vao(
 }
 
 
+unsafe fn draw_scene(
+    node: &SceneNode,
+    transform: &glm::Mat4,
+    transform_location: i32,
+) {
+    // Draw this node if it contains a VAO.
+    if node.index_count >= 0 {
+        gl::BindVertexArray(node.vao_id);
 
+        gl::UniformMatrix4fv(
+            transform_location,
+            1,
+            gl::FALSE,
+            transform.as_ptr(),
+        );
+
+        gl::DrawElements(
+            gl::TRIANGLES,
+            node.index_count,
+            gl::UNSIGNED_INT,
+            ptr::null(),
+        );
+    }
+
+    // Recursively draw all children.
+    for i in 0..node.n_children() {
+        draw_scene(
+            &node[i],
+            transform,
+            transform_location,
+        );
+    }
+}
 
 
 fn main() {
@@ -288,6 +320,9 @@ let helicopter_tail_rotor_vao = unsafe {
     )
 };
 
+
+
+
 let helicopter_body_index_count = helicopter.body.index_count;
 let helicopter_door_index_count = helicopter.door.index_count;
 let helicopter_main_rotor_index_count = helicopter.main_rotor.index_count;
@@ -327,6 +362,17 @@ let mut helicopter_tail_rotor_node =
         helicopter_tail_rotor_index_count,
     );
 
+
+    
+    // Build scene graph hierarchy
+    helicopter_root.add_child(&helicopter_body_node);
+    helicopter_root.add_child(&helicopter_door_node);
+    helicopter_root.add_child(&helicopter_main_rotor_node);
+    helicopter_root.add_child(&helicopter_tail_rotor_node);
+
+    terrain_node.add_child(&helicopter_root);
+
+    scene_root.add_child(&terrain_node);
 
 
 
@@ -609,50 +655,10 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
                     transform.as_ptr(),
                 );
 
-                // Draw terrain
-                gl::BindVertexArray(terrain_vao);
-
-                gl::DrawElements(
-                    gl::TRIANGLES,
-                    index_count,
-                    gl::UNSIGNED_INT,
-                    ptr::null(),
-                );
-
-                // Draw helicopter body
-                gl::BindVertexArray(helicopter_body_vao);
-                gl::DrawElements(
-                    gl::TRIANGLES,
-                    helicopter_body_index_count,
-                    gl::UNSIGNED_INT,
-                    ptr::null(),
-                );
-
-                // Draw helicopter door
-                gl::BindVertexArray(helicopter_door_vao);
-                gl::DrawElements(
-                    gl::TRIANGLES,
-                    helicopter_door_index_count,
-                    gl::UNSIGNED_INT,
-                    ptr::null(),
-                );
-
-                // Draw helicopter main rotor
-                gl::BindVertexArray(helicopter_main_rotor_vao);
-                gl::DrawElements(
-                    gl::TRIANGLES,
-                    helicopter_main_rotor_index_count,
-                    gl::UNSIGNED_INT,
-                    ptr::null(),
-                );
-
-                // Draw helicopter tail rotor
-                gl::BindVertexArray(helicopter_tail_rotor_vao);
-                gl::DrawElements(
-                    gl::TRIANGLES,
-                    helicopter_tail_rotor_index_count,
-                    gl::UNSIGNED_INT,
-                    ptr::null(),
+                draw_scene(
+                    &scene_root,
+                    &transform,
+                    transform_location,
                 );
             }
 
