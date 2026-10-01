@@ -180,11 +180,9 @@ unsafe fn draw_scene(
     transform: &glm::Mat4,
     transform_location: i32,
 ) {
-    // Translate to the node's position.
     let translation =
         glm::translation(&node.position);
 
-    // Rotate around the x, y, and z axes.
     let rotation_x =
         glm::rotation(
             node.rotation.x,
@@ -203,15 +201,12 @@ unsafe fn draw_scene(
             &glm::vec3(0.0, 0.0, 1.0),
         );
 
-    // Move the reference point to the origin.
     let reference_translation =
         glm::translation(&(-node.reference_point));
 
-    // Move the reference point back after rotating.
     let reference_translation_back =
         glm::translation(&node.reference_point);
 
-    // Construct the node's relative transformation.
     let node_transform =
         translation
         * reference_translation_back
@@ -220,11 +215,10 @@ unsafe fn draw_scene(
         * rotation_x
         * reference_translation;
 
-    // Combine this node's transformation with the parent's.
-    let current_transform =
+    // View Projection × Model = MVP
+    let mvp =
         transform * node_transform;
 
-    // Draw this node if it contains a VAO.
     if node.index_count >= 0 {
         gl::BindVertexArray(node.vao_id);
 
@@ -232,7 +226,7 @@ unsafe fn draw_scene(
             transform_location,
             1,
             gl::FALSE,
-            current_transform.as_ptr(),
+            mvp.as_ptr(),
         );
 
         gl::DrawElements(
@@ -243,11 +237,10 @@ unsafe fn draw_scene(
         );
     }
 
-    // Recursively draw all children.
     for i in 0..node.n_children() {
         draw_scene(
             &node[i],
-            &current_transform,
+            &mvp,
             transform_location,
         );
     }
@@ -388,6 +381,10 @@ let mut helicopter_body_node =
         helicopter_body_vao,
         helicopter_body_index_count,
     );
+
+    // just to demonstrate that you can set the position of a node in the scene graph, we will move the helicopter body 2 units to the right (task 3 assignment 3)
+//helicopter_body_node.position = 
+//    glm::vec3(2.0, 0.0, 0.0);
 
 let mut helicopter_door_node =
     SceneNode::from_vao(
@@ -649,6 +646,11 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
                 }
             }
             */
+
+
+            // Task 4a: continuously rotate the helicopter rotors
+            helicopter_main_rotor_node.rotation.y = elapsed * 5.0;
+            helicopter_tail_rotor_node.rotation.x = elapsed * 5.0;
 
 
             // Handle mouse movement. delta contains the x and y movement of the mouse since last frame in pixels
