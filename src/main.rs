@@ -108,6 +108,27 @@ unsafe fn create_vao(
     let mut nbo = 0;
 
     gl::GenBuffers(1, &mut nbo);
+    
+    gl::BindBuffer(gl::ARRAY_BUFFER, nbo);
+
+    gl::BufferData(
+        gl::ARRAY_BUFFER,
+        byte_size_of_array(normals),
+        pointer_to_array(normals),
+        gl::STATIC_DRAW,
+    );
+
+    // Attribute 2 = normal
+    gl::VertexAttribPointer(
+        2,
+        3,
+        gl::FLOAT,
+        gl::FALSE,
+        3 * size_of::<f32>(),
+        ptr::null(),
+    );
+
+    gl::EnableVertexAttribArray(2);
 
 
     // Vertex colors
