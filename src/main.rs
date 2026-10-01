@@ -20,6 +20,7 @@ mod shader;
 mod util;
 mod mesh;
 mod scene_graph;
+mod toolbox;
 
 use glutin::event::{Event, WindowEvent, DeviceEvent, KeyboardInput, ElementState::{Pressed, Released}, VirtualKeyCode::{self, *}};
 use glutin::event_loop::ControlFlow;
@@ -650,7 +651,24 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
 
             // Task 4a: continuously rotate the helicopter rotors
             helicopter_main_rotor_node.rotation.y = elapsed * 5.0;
-            helicopter_tail_rotor_node.rotation.x = elapsed * 5.0;
+            helicopter_tail_rotor_node.rotation.x = elapsed * 5.0; // different axis of rotation for the tail rotor, looks very silly otherwise
+
+            // 4b: animate helicopter along a path 
+
+            let heading = toolbox::simple_heading_animation(elapsed);
+
+            helicopter_root.position =
+                glm::vec3(heading.x, 0.0, heading.z);
+
+            helicopter_root.rotation.x =
+                heading.pitch;
+
+            helicopter_root.rotation.y =
+                heading.yaw;
+
+            helicopter_root.rotation.z =
+                heading.roll;
+
 
 
             // Handle mouse movement. delta contains the x and y movement of the mouse since last frame in pixels
