@@ -361,7 +361,29 @@ let mut helicopter_tail_rotor_node =
         helicopter_tail_rotor_vao,
         helicopter_tail_rotor_index_count,
     );
+    
+    // Set reference points for the scene graph nodes (task 3a assignment 3)
 
+    scene_root.reference_point =
+        glm::vec3(0.0, 0.0, 0.0);
+
+    terrain_node.reference_point =
+        glm::vec3(0.0, 0.0, 0.0);
+
+    helicopter_root.reference_point =
+        glm::vec3(0.0, 0.0, 0.0);
+
+    helicopter_body_node.reference_point =
+        glm::vec3(0.0, 0.0, 0.0);
+
+    helicopter_door_node.reference_point =
+        glm::vec3(0.0, 0.0, 0.0);
+
+    helicopter_main_rotor_node.reference_point =
+        glm::vec3(0.0, 0.0, 0.0);
+
+    helicopter_tail_rotor_node.reference_point =
+        glm::vec3(0.35, 2.3, 10.4);
 
     
     // Build scene graph hierarchy
