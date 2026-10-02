@@ -539,8 +539,11 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
         let mut camera_yaw: f32 = 0.0;
         let mut camera_pitch: f32 = 0.0;
 
+        // Chase camera
+        let chase_radius: f32 = 15.0;
+
         // Camera movement speed.
-        // 50 = normal fast movement, 500 = running speed.
+        // 50 = normal fast movement, 300 = running speed.
         let mut movement_speed: f32 = 50.0;
 
         // The main rendering loop
@@ -813,52 +816,56 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
 
             // == // Please compute camera transforms here (exercise 2 & 3)
 
-            // Create the camera transformation from scratch every frame.
-            let mut camera_transform: glm::Mat4 = glm::identity();
+            // == // Chase camera
 
-            // Move the world in the opposite direction of the camera.
+            // Position of the helicopter we are following.
+            let target =
+                helicopter_roots[0].position;
 
-            let scene_translation =
-                glm::translation(&glm::vec3(0.0, 0.0, -2.0)); // Keeps triangles infront of camera
+            // Current camera position.
+            let camera_position =
+                glm::vec3(camera_x, camera_y, camera_z);
 
-            let camera_translation =
-                glm::translation(&glm::vec3(
-                    -camera_x,
-                    -camera_y,
-                    -camera_z,
-                ));
+            // Vector from the camera to the helicopter.
+            let to_target =
+                target - camera_position;
 
-            // Rotate the world in the opposite direction of the camera.
-            let yaw_rotation =
-                glm::rotation(
-                    -camera_yaw,
+            let distance =
+                glm::length(&to_target);
+
+            // If the helicopter leaves the chase radius,
+            // move the camera towards it until it is exactly
+            // on the edge of the radius.
+            if distance > chase_radius {
+                let direction =
+                    glm::normalize(&to_target);
+
+                let new_camera_position =
+                    target - direction * chase_radius;
+
+                camera_x = new_camera_position.x;
+                camera_y = new_camera_position.y;
+                camera_z = new_camera_position.z;
+            }
+
+            // Make the camera look directly at the helicopter.
+            let camera_transform =
+                glm::look_at(
+                    &glm::vec3(camera_x, camera_y, camera_z),
+                    &target,
                     &glm::vec3(0.0, 1.0, 0.0),
                 );
-
-            let pitch_rotation =
-                glm::rotation(
-                    -camera_pitch,
-                    &glm::vec3(1.0, 0.0, 0.0),
-                );
-
-            // Combine the camera transformations.
-                camera_transform =
-                    pitch_rotation *
-                    yaw_rotation *
-                    camera_translation *
-                    scene_translation;
 
             let projection: glm::Mat4 =
                 glm::perspective(
                     window_aspect_ratio,
                     glm::radians(&glm::vec1(45.0)).x,
                     1.0,
-                    2000.0, //assingment 3 change
-                    
-            );
+                    2000.0,
+                );
 
-                // Projection must be the final transformation.
-            let transform: glm::Mat4 = projection * camera_transform;
+            let transform =
+                projection * camera_transform;
 
 
             unsafe {
