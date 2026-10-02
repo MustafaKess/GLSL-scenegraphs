@@ -535,6 +535,10 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
         let mut camera_yaw: f32 = 0.0;
         let mut camera_pitch: f32 = 0.0;
 
+        // Camera movement speed.
+        // 50 = normal fast movement, 500 = running speed.
+        let mut movement_speed: f32 = 50.0;
+
         // The main rendering loop
         let first_frame_time = std::time::Instant::now();
         let mut previous_frame_time = first_frame_time;
@@ -558,39 +562,55 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
 
 
 
-            // Changes done after 5A (bonus task)
+            // Changes done after bonus task
+            //let mut movement = glm::vec3(0.0, 0.0, 0.0);
+
+            // Changes done after bonus task
             let mut movement = glm::vec3(0.0, 0.0, 0.0);
 
             if let Ok(keys) = pressed_keys.lock() {
+
+                // Hold R for running speed.
+                // Normal speed = 50
+                // Running speed = 500
+                let movement_speed =
+                    if keys.contains(&VirtualKeyCode::R) {
+                        300.0
+                    } else {
+                        50.0
+                    };
+
                 for key in keys.iter() {
                     match key {
 
-                        // Camera movement relative to where it is facing
                         VirtualKeyCode::A => {
-                            movement.x -= 8.0 * delta_time;
+                            movement.x -= movement_speed * delta_time;
                         }
+
                         VirtualKeyCode::D => {
-                            movement.x += 8.0 * delta_time;
+                            movement.x += movement_speed * delta_time;
                         }
 
                         VirtualKeyCode::W => {
-                            movement.z -= 8.0 * delta_time;
+                            movement.z -= movement_speed * delta_time;
                         }
+
                         VirtualKeyCode::S => {
-                            movement.z += 8.0 * delta_time;
+                            movement.z += movement_speed * delta_time;
                         }
 
                         VirtualKeyCode::Space => {
-                            movement.y += 8.0 * delta_time;
-                        }
-                        VirtualKeyCode::LShift => {
-                            movement.y -= 8.0 * delta_time;
+                            movement.y += movement_speed * delta_time;
                         }
 
-                        // Camera rotation
+                        VirtualKeyCode::LShift => {
+                            movement.y -= movement_speed * delta_time;
+                        }
+
                         VirtualKeyCode::Left => {
                             camera_yaw -= delta_time;
                         }
+
                         VirtualKeyCode::Right => {
                             camera_yaw += delta_time;
                         }
@@ -598,6 +618,7 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
                         VirtualKeyCode::Up => {
                             camera_pitch += delta_time;
                         }
+
                         VirtualKeyCode::Down => {
                             camera_pitch -= delta_time;
                         }
@@ -606,7 +627,6 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
                     }
                 }
             }
-
             
 
             // Limit vertical camera rotation
@@ -807,7 +827,8 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
                     window_aspect_ratio,
                     glm::radians(&glm::vec1(45.0)).x,
                     1.0,
-                    1000.0, //assingment 3 change
+                    2000.0, //assingment 3 change
+                    
             );
 
                 // Projection must be the final transformation.
@@ -919,6 +940,7 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
                             println!("Helicopter paused: {}", *paused_state);
                         }
                     }
+                    
 
                     _ => { }
                 }
