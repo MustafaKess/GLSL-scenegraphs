@@ -6,6 +6,7 @@ layout(location = 2) in vec3 normal;
 
 out vec4 vertexColor;
 out vec3 vertexNormal;
+out vec3 vertexPosition;
 
 uniform mat4 transform;
 uniform mat4 model;
@@ -16,4 +17,5 @@ void main()
 
     vertexColor = color;
     vertexNormal = normalize(mat3(model) * normal);
+    vertexPosition = vec3(model * vec4(position, 1.0));
     }
