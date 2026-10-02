@@ -289,6 +289,10 @@ fn main() {
     let arc_pause_cooldown = Arc::new(Mutex::new(std::time::Instant::now()));
     let pause_cooldown = Arc::clone(&arc_pause_cooldown);
 
+    let arc_door_open = Arc::new(Mutex::new(false));
+    let door_open = Arc::clone(&arc_door_open);
+
+
     // Make a reference of this vector to send to the render thread
     let pressed_keys = Arc::clone(&arc_pressed_keys);
 
@@ -771,6 +775,28 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
                     // Tail rotor
                     helicopter_root[3].rotation.x =
                         helicopter_time * 5.0;
+
+                    // Door animation
+                    let is_door_open = {
+                        if let Ok(door_state) = door_open.lock() {
+                            *door_state
+                        } else {
+                            false
+                        }
+                    };
+
+                    let target_door_z =
+                        if is_door_open {
+                            1.75
+                        } else {
+                            0.0
+                        };
+
+                    let door_speed = 5.0;
+
+                    helicopter_root[1].position.z +=
+                        (target_door_z - helicopter_root[1].position.z)
+                        * (1.0 - (-door_speed * delta_time).exp());
                 }
             }
 
@@ -938,6 +964,18 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
                         if let Ok(mut paused_state) = arc_paused.lock() {
                             *paused_state = !*paused_state;
                             println!("Helicopter paused: {}", *paused_state);
+                        }
+                    }
+
+                    E => {
+                        if let Ok(mut door_state) = arc_door_open.lock() {
+                            *door_state = true;
+                        }
+                    }
+
+                    T => {
+                        if let Ok(mut door_state) = arc_door_open.lock() {
+                            *door_state = false;
                         }
                     }
                     
