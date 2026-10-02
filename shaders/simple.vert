@@ -8,11 +8,12 @@ out vec4 vertexColor;
 out vec3 vertexNormal;
 
 uniform mat4 transform;
+uniform mat4 model;
 
 void main()
 {
     gl_Position = transform * vec4(position, 1.0);
 
     vertexColor = color;
-    vertexNormal = normal;
+    vertexNormal = mat3(model) * normal;
 }

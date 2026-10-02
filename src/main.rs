@@ -178,8 +178,10 @@ unsafe fn create_vao(
 
 unsafe fn draw_scene(
     node: &SceneNode,
-    transform: &glm::Mat4,
+    model_parent: &glm::Mat4,
+    view_projection: &glm::Mat4,
     transform_location: i32,
+    model_location: i32,
 ) {
     let translation =
         glm::translation(&node.position);
@@ -216,18 +218,31 @@ unsafe fn draw_scene(
         * rotation_x
         * reference_translation;
 
-    // View Projection × Model = MVP
+    // Accumulate only the Model transformation.
+    let model =
+        model_parent * node_transform;
+
+    // View Projection × Model = MVP.
     let mvp =
-        transform * node_transform;
+        view_projection * model;
 
     if node.index_count >= 0 {
         gl::BindVertexArray(node.vao_id);
 
+        // MVP: transforms vertex positions.
         gl::UniformMatrix4fv(
             transform_location,
             1,
             gl::FALSE,
             mvp.as_ptr(),
+        );
+
+        // Model: transforms vertex normals.
+        gl::UniformMatrix4fv(
+            model_location,
+            1,
+            gl::FALSE,
+            model.as_ptr(),
         );
 
         gl::DrawElements(
@@ -241,8 +256,10 @@ unsafe fn draw_scene(
     for i in 0..node.n_children() {
         draw_scene(
             &node[i],
-            &mvp,
+            &model,
+            view_projection,
             transform_location,
+            model_location,
         );
     }
 }
@@ -264,6 +281,14 @@ fn main() {
 
     // Set up a shared vector for keeping track of currently pressed keys
     let arc_pressed_keys = Arc::new(Mutex::new(Vec::<VirtualKeyCode>::with_capacity(10)));
+
+    //pause functionality, for documentation purposes
+    let arc_paused = Arc::new(Mutex::new(false));
+    let paused = Arc::clone(&arc_paused);
+
+    let arc_pause_cooldown = Arc::new(Mutex::new(std::time::Instant::now()));
+    let pause_cooldown = Arc::clone(&arc_pause_cooldown);
+
     // Make a reference of this vector to send to the render thread
     let pressed_keys = Arc::clone(&arc_pressed_keys);
 
@@ -462,6 +487,11 @@ let transform_location = unsafe {
     simple_shader.get_uniform_location("transform")
 };
 
+let model_location = unsafe {
+    simple_shader.get_uniform_location("model")
+};
+
+
 /*
 let time_location = unsafe { //needed for extra challange d (assignment 1), for color changing
 
@@ -649,25 +679,35 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
             */
 
 
-            // Task 4a: continuously rotate the helicopter rotors
-            helicopter_main_rotor_node.rotation.y = elapsed * 5.0;
-            helicopter_tail_rotor_node.rotation.x = elapsed * 5.0; // different axis of rotation for the tail rotor, looks very silly otherwise
+            // Task 4a + 4b: animate helicopter unless paused
+            let is_paused = {
+                if let Ok(paused_state) = paused.lock() {
+                    *paused_state
+                } else {
+                    false
+                }
+            };
 
-            // 4b: animate helicopter along a path 
+            if !is_paused {
+                // Continuously rotate the helicopter rotors
+                helicopter_main_rotor_node.rotation.y = elapsed * 5.0;
+                helicopter_tail_rotor_node.rotation.x = elapsed * 5.0;
 
-            let heading = toolbox::simple_heading_animation(elapsed);
+                // Animate helicopter along a path
+                let heading = toolbox::simple_heading_animation(elapsed);
 
-            helicopter_root.position =
-                glm::vec3(heading.x, 0.0, heading.z);
+                helicopter_root.position =
+                    glm::vec3(heading.x, 0.0, heading.z);
 
-            helicopter_root.rotation.x =
-                heading.pitch;
+                helicopter_root.rotation.x =
+                    heading.pitch;
 
-            helicopter_root.rotation.y =
-                heading.yaw;
+                helicopter_root.rotation.y =
+                    heading.yaw;
 
-            helicopter_root.rotation.z =
-                heading.roll;
+                helicopter_root.rotation.z =
+                    heading.roll;
+            }
 
 
 
@@ -737,8 +777,10 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
 
                 draw_scene(
                     &scene_root,
+                    &glm::identity(),
                     &transform,
                     transform_location,
+                    model_location,
                 );
             }
 
@@ -798,19 +840,42 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
                                 keys.remove(i);
                             }
                         },
-                        Pressed => {
+                        Pressed => { //changed to allow pausing (and buffer for the pause/unpause so it doesnt swap too fast)
                             if !keys.contains(&keycode) {
                                 keys.push(keycode);
+
+                                if keycode == P {
+                                    if let Ok(mut last_toggle) = pause_cooldown.lock() {
+                                        let now = std::time::Instant::now();
+
+                                        // 500 ms cooldown between pause/unpause
+                                        if now.duration_since(*last_toggle).as_millis() >= 300 {
+                                            *last_toggle = now;
+
+                                            if let Ok(mut paused_state) = arc_paused.lock() {
+                                                *paused_state = !*paused_state;
+                                                println!("Helicopter paused: {}", *paused_state);
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
 
-                // Handle Escape and Q keys separately
                 match keycode {
                     Escape => { *control_flow = ControlFlow::Exit; }
                     Q      => { *control_flow = ControlFlow::Exit; }
-                    _      => { }
+
+                    P => {
+                        if let Ok(mut paused_state) = arc_paused.lock() {
+                            *paused_state = !*paused_state;
+                            println!("Helicopter paused: {}", *paused_state);
+                        }
+                    }
+
+                    _ => { }
                 }
             }
             Event::DeviceEvent { event: DeviceEvent::MouseMotion { delta }, .. } => {
