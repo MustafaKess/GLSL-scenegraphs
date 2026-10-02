@@ -15,5 +15,5 @@ void main()
     gl_Position = transform * vec4(position, 1.0);
 
     vertexColor = color;
-    vertexNormal = mat3(model) * normal;
-}
+    vertexNormal = normalize(mat3(model) * normal);
+    }

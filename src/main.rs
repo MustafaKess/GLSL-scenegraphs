@@ -546,24 +546,24 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
 
                         // Camera movement relative to where it is facing
                         VirtualKeyCode::A => {
-                            movement.x -= 4.0 * delta_time;
+                            movement.x -= 8.0 * delta_time;
                         }
                         VirtualKeyCode::D => {
-                            movement.x += 4.0 * delta_time;
+                            movement.x += 8.0 * delta_time;
                         }
 
                         VirtualKeyCode::W => {
-                            movement.z -= 4.0 * delta_time;
+                            movement.z -= 8.0 * delta_time;
                         }
                         VirtualKeyCode::S => {
-                            movement.z += 4.0 * delta_time;
+                            movement.z += 8.0 * delta_time;
                         }
 
                         VirtualKeyCode::Space => {
-                            movement.y += 4.0 * delta_time;
+                            movement.y += 8.0 * delta_time;
                         }
                         VirtualKeyCode::LShift => {
-                            movement.y -= 4.0 * delta_time;
+                            movement.y -= 8.0 * delta_time;
                         }
 
                         // Camera rotation
