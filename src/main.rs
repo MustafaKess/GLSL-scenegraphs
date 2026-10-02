@@ -394,50 +394,47 @@ let helicopter_tail_rotor_index_count = helicopter.tail_rotor.index_count;
 
 let index_count = terrain.index_count;
 
+
+
 let mut scene_root = SceneNode::new();
 
 let mut terrain_node =
     SceneNode::from_vao(terrain_vao, index_count);
 
-let mut helicopter_root =
-    SceneNode::new();
+// Store the five helicopter root nodes.
+// All helicopters share the same VAOs.
+let mut helicopter_roots: Vec<scene_graph::Node> =
+    Vec::new();
 
-let mut helicopter_body_node =
-    SceneNode::from_vao(
-        helicopter_body_vao,
-        helicopter_body_index_count,
-    );
+for _ in 0..5 {
+    let mut helicopter_root =
+        SceneNode::new();
 
-    // just to demonstrate that you can set the position of a node in the scene graph, we will move the helicopter body 2 units to the right (task 3 assignment 3)
-//helicopter_body_node.position = 
-//    glm::vec3(2.0, 0.0, 0.0);
+    let mut helicopter_body_node =
+        SceneNode::from_vao(
+            helicopter_body_vao,
+            helicopter_body_index_count,
+        );
 
-let mut helicopter_door_node =
-    SceneNode::from_vao(
-        helicopter_door_vao,
-        helicopter_door_index_count,
-    );
+    let mut helicopter_door_node =
+        SceneNode::from_vao(
+            helicopter_door_vao,
+            helicopter_door_index_count,
+        );
 
-let mut helicopter_main_rotor_node =
-    SceneNode::from_vao(
-        helicopter_main_rotor_vao,
-        helicopter_main_rotor_index_count,
-    );
+    let mut helicopter_main_rotor_node =
+        SceneNode::from_vao(
+            helicopter_main_rotor_vao,
+            helicopter_main_rotor_index_count,
+        );
 
-let mut helicopter_tail_rotor_node =
-    SceneNode::from_vao(
-        helicopter_tail_rotor_vao,
-        helicopter_tail_rotor_index_count,
-    );
+    let mut helicopter_tail_rotor_node =
+        SceneNode::from_vao(
+            helicopter_tail_rotor_vao,
+            helicopter_tail_rotor_index_count,
+        );
 
-    // Set reference points for the scene graph nodes (task 3a assignment 3)
-
-    scene_root.reference_point =
-        glm::vec3(0.0, 0.0, 0.0);
-
-    terrain_node.reference_point =
-        glm::vec3(0.0, 0.0, 0.0);
-
+    // Reference points
     helicopter_root.reference_point =
         glm::vec3(0.0, 0.0, 0.0);
 
@@ -453,17 +450,41 @@ let mut helicopter_tail_rotor_node =
     helicopter_tail_rotor_node.reference_point =
         glm::vec3(0.35, 2.3, 10.4);
 
-    
-    // Build scene graph hierarchy
-    helicopter_root.add_child(&helicopter_body_node);
-    helicopter_root.add_child(&helicopter_door_node);
-    helicopter_root.add_child(&helicopter_main_rotor_node);
-    helicopter_root.add_child(&helicopter_tail_rotor_node);
+    // Helicopter hierarchy
+    helicopter_root.add_child(
+        &helicopter_body_node
+    );
 
-    terrain_node.add_child(&helicopter_root);
+    helicopter_root.add_child(
+        &helicopter_door_node
+    );
 
-    scene_root.add_child(&terrain_node);
+    helicopter_root.add_child(
+        &helicopter_main_rotor_node
+    );
 
+    helicopter_root.add_child(
+        &helicopter_tail_rotor_node
+    );
+
+    // Store this helicopter root.
+    helicopter_roots.push(helicopter_root);
+}
+
+// Scene root and terrain reference points
+scene_root.reference_point =
+    glm::vec3(0.0, 0.0, 0.0);
+
+terrain_node.reference_point =
+    glm::vec3(0.0, 0.0, 0.0);
+
+// Add all five helicopters to the terrain
+for helicopter_root in &helicopter_roots {
+    terrain_node.add_child(&*helicopter_root);
+}
+
+// Terrain is the child of the scene root
+scene_root.add_child(&terrain_node);
 
 
 //implementation of the shader builder is in src/shader.rs
@@ -679,7 +700,8 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
             */
 
 
-            // Task 4a + 4b: animate helicopter unless paused
+            // Task 4a + 4b + Task 6a:
+            // Animate all helicopters unless paused.
             let is_paused = {
                 if let Ok(paused_state) = paused.lock() {
                     *paused_state
@@ -689,24 +711,47 @@ let time_location = unsafe { //needed for extra challange d (assignment 1), for 
             };
 
             if !is_paused {
-                // Continuously rotate the helicopter rotors
-                helicopter_main_rotor_node.rotation.y = elapsed * 5.0;
-                helicopter_tail_rotor_node.rotation.x = elapsed * 5.0;
+                for (i, helicopter_root)
+                    in helicopter_roots.iter_mut().enumerate()
+                {
+                    // Each helicopter gets a different point along
+                    // the same animation path.
+                    let offset = i as f32 * 1.5;
 
-                // Animate helicopter along a path
-                let heading = toolbox::simple_heading_animation(elapsed);
+                    let helicopter_time =
+                        elapsed + offset;
 
-                helicopter_root.position =
-                    glm::vec3(heading.x, 0.0, heading.z);
+                    let heading =
+                        toolbox::simple_heading_animation(
+                            helicopter_time
+                        );
 
-                helicopter_root.rotation.x =
-                    heading.pitch;
+                    // Follow the same path with a different offset.
+                    helicopter_root.position =
+                        glm::vec3(
+                            heading.x,
+                            0.0,
+                            heading.z,
+                        );
 
-                helicopter_root.rotation.y =
-                    heading.yaw;
+                    // Follow the path orientation.
+                    helicopter_root.rotation.x =
+                        heading.pitch;
 
-                helicopter_root.rotation.z =
-                    heading.roll;
+                    helicopter_root.rotation.y =
+                        heading.yaw;
+
+                    helicopter_root.rotation.z =
+                        heading.roll;
+
+                    // Main rotor
+                    helicopter_root[2].rotation.y =
+                        helicopter_time * 5.0;
+
+                    // Tail rotor
+                    helicopter_root[3].rotation.x =
+                        helicopter_time * 5.0;
+                }
             }
 
 
